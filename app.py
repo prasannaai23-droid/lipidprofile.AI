@@ -2,14 +2,23 @@ from flask import Flask, render_template, request, redirect, url_for, send_from_
 import sqlite3, os, json
 from ml.ocr import extract_values_from_imagefile
 
+# ---- Paths & Folder Setup ----
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "db", "heartcare.db")
+
+DATA_DIR = os.path.join(BASE_DIR, "data")
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploaded")
+
+# ✅ Create required folders if not exist
+os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# Database path
+DB_PATH = os.path.join(DATA_DIR, "heartcare.db")
+
+# ---- Flask App ----
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
-# DB setup
+# ---- Database Setup ----
 conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 c = conn.cursor()
 c.execute("""
@@ -26,6 +35,7 @@ CREATE TABLE IF NOT EXISTS reports (
 """)
 conn.commit()
 
+# ---- Risk Classification ----
 def classify_risk(ldl, hdl, trig):
     if (ldl is not None and ldl >= 190) or (trig is not None and trig >= 1000):
         return "urgent"
@@ -35,6 +45,7 @@ def classify_risk(ldl, hdl, trig):
         return "medium"
     return "low"
 
+# ---- Routes ----
 @app.route("/")
 def home():
     return render_template("home.html")
@@ -48,8 +59,10 @@ def submit():
 
     risk = classify_risk(ldl, hdl, trig)
 
-    c.execute("INSERT INTO reports (patient_id, ldl, hdl, trig, risk, raw_text, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
-              (pid, ldl, hdl, trig, risk, json.dumps({}),))
+    c.execute(
+        "INSERT INTO reports (patient_id, ldl, hdl, trig, risk, raw_text, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
+        (pid, ldl, hdl, trig, risk, json.dumps({}),),
+    )
     conn.commit()
     return redirect(url_for("dashboard", patient_id=pid))
 
@@ -75,21 +88,25 @@ def upload_report():
     raw_text = values.get("raw_text", "")
 
     risk = classify_risk(ldl, hdl, trig)
-    c.execute("INSERT INTO reports (patient_id, ldl, hdl, trig, risk, raw_text, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
-              (pid, ldl, hdl, trig, risk, raw_text))
+    c.execute(
+        "INSERT INTO reports (patient_id, ldl, hdl, trig, risk, raw_text, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))",
+        (pid, ldl, hdl, trig, risk, raw_text),
+    )
     conn.commit()
 
     return redirect(url_for("dashboard", patient_id=pid))
 
 @app.route("/dashboard/<patient_id>")
 def dashboard(patient_id):
-    c.execute("SELECT ldl, hdl, trig, risk, raw_text, created_at FROM reports WHERE patient_id=? ORDER BY created_at DESC LIMIT 1", (patient_id,))
+    c.execute(
+        "SELECT ldl, hdl, trig, risk, raw_text, created_at FROM reports WHERE patient_id=? ORDER BY created_at DESC LIMIT 1",
+        (patient_id,),
+    )
     row = c.fetchone()
     if not row:
         return render_template("dashboard.html", patient_id=patient_id, risk="no-data", plan={})
 
     ldl, hdl, trig, risk, raw_text, created_at = row
-    # simple plan based on risk
     plans = {
         "low": {"meals":["Balanced diet","More vegetables & oats"], "exercise":["Walk 30 min, 3x/week"], "reminders":["Monthly check-up"]},
         "medium": {"meals":["Low saturated fats","More fish"], "exercise":["Walk 30 min daily"], "reminders":["Weekly weight check"]},
@@ -98,14 +115,22 @@ def dashboard(patient_id):
     }
     plan = plans.get(risk, plans["low"])
 
-    return render_template("dashboard.html",
-                           patient_id=patient_id,
-                           ldl=ldl, hdl=hdl, trig=trig,
-                           risk=risk, plan=plan, raw_text=raw_text, created_at=created_at)
+    return render_template(
+        "dashboard.html",
+        patient_id=patient_id,
+        ldl=ldl,
+        hdl=hdl,
+        trig=trig,
+        risk=risk,
+        plan=plan,
+        raw_text=raw_text,
+        created_at=created_at,
+    )
 
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_DIR, filename)
 
+# ---- Run App ----
 if __name__ == "__main__":
     app.run(debug=True)
