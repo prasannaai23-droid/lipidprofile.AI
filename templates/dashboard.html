@@ -1,69 +1,38 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="/static/css/style.css">
+  <title>Dashboard - LipidProfile.AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-  <div class="container">
-    <h1>Dashboard — {{ patient_id }}</h1>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Dashboard for {{ patient_id }}</h2>
+    <div class="card p-4">
+      <p><strong>LDL:</strong> {{ ldl }}</p>
+      <p><strong>HDL:</strong> {{ hdl }}</p>
+      <p><strong>Triglycerides:</strong> {{ trig }}</p>
+      <p><strong>Risk Level:</strong> <span class="text-danger">{{ risk }}</span></p>
+    </div>
 
-    {% if risk == "no-data" %}
-      <p>No data yet for this patient. <a href="/">Submit</a> or <a href="/upload">upload report</a>.</p>
-    {% else %}
-      <p><strong>Recorded:</strong> {{ created_at }}</p>
-      <p><strong>LDL:</strong> {{ ldl }} mg/dL</p>
-      <p><strong>HDL:</strong> {{ hdl }} mg/dL</p>
-      <p><strong>Triglycerides:</strong> {{ trig }} mg/dL</p>
-      <p><strong>Risk:</strong> <span class="risk {{ risk }}">{{ risk.upper() }}</span></p>
-
-      <!-- Add chart section -->
-      <h3>Lipid Profile Chart</h3>
-      <canvas id="lipidChart" width="400" height="200"></canvas>
-
-      <h3>Daily Plan</h3>
+    <div class="mt-4">
+      <h4>Lifestyle Plan</h4>
       <ul>
-        {% for m in plan.meals %}<li>{{ m }}</li>{% endfor %}
+        {% for meal in plan.meals %}
+          <li>{{ meal }}</li>
+        {% endfor %}
       </ul>
-
-      <h3>Exercise</h3>
       <ul>
-        {% for e in plan.exercise %}<li>{{ e }}</li>{% endfor %}
+        {% for ex in plan.exercise %}
+          <li>{{ ex }}</li>
+        {% endfor %}
       </ul>
-
-      <h3>Reminders</h3>
       <ul>
-        {% for r in plan.reminders %}<li>{{ r }}</li>{% endfor %}
+        {% for rem in plan.reminders %}
+          <li>{{ rem }}</li>
+        {% endfor %}
       </ul>
-
-      <h3>Raw OCR Text</h3>
-      <pre>{{ raw_text }}</pre>
-    {% endif %}
+    </div>
   </div>
-
-  <!-- Chart.js Script -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    const ctx = document.getElementById('lipidChart').getContext('2d');
-    const lipidChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['LDL', 'HDL', 'Triglycerides'],
-        datasets: [{
-          label: 'mg/dL',
-          data: [{{ ldl }}, {{ hdl }}, {{ trig }}],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true
-          }
-        }
-      }
-    });
-  </script>
 </body>
 </html>

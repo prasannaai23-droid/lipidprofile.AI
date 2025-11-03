@@ -1,18 +1,11 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>LipidProfile.AI — Home</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-  <div class="container text-center mt-5">
-    <h1 class="mb-4">LipidProfile.AI</h1>
-    <p class="lead">AI-based Lipid Profile Risk Classification & Lifestyle Planner</p>
-    <div class="mt-5">
-      <a href="/upload" class="btn btn-primary btn-lg mx-2">Upload Report</a>
-      <a href="/submit" class="btn btn-outline-secondary btn-lg mx-2">Enter Manually</a>
-    </div>
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center mt-5">
+  <h1 class="mb-4">Welcome to LipidProfile.AI</h1>
+  <p class="lead">AI-based Lipid Profile Risk Classification & Lifestyle Planner</p>
+  <div class="mt-5">
+    <a href="/upload" class="btn btn-primary btn-lg mx-2">Upload Report</a>
+    <a href="/submit" class="btn btn-outline-secondary btn-lg mx-2">Enter Manually</a>
   </div>
-</body>
-</html>
+</div>
+{% endblock %}
