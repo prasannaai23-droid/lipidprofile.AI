@@ -1,0 +1,17 @@
+# Virtual environment
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# DB
+db/*.db
+*.db
+
+# Uploaded files
+uploaded/
+
+# Secrets
+.env

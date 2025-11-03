@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>HeartCare - Submit Values</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>HeartCare AI</h1>
+    <form action="/submit" method="post">
+      <input name="patient_id" placeholder="Patient ID" required>
+      <input name="ldl" type="number" placeholder="LDL (mg/dL)" required>
+      <input name="hdl" type="number" placeholder="HDL (mg/dL)" required>
+      <input name="trig" type="number" placeholder="Triglycerides (mg/dL)" required>
+      <button type="submit">Analyze</button>
+    </form>
+    <p>Or <a href="/upload">upload report image</a></p>
+  </div>
+</body>
+</html>

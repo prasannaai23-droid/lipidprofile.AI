@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Dashboard — {{ patient_id }}</h1>
+
+    {% if risk == "no-data" %}
+      <p>No data yet for this patient. <a href="/">Submit</a> or <a href="/upload">upload report</a>.</p>
+    {% else %}
+      <p><strong>Recorded:</strong> {{ created_at }}</p>
+      <p><strong>LDL:</strong> {{ ldl }} mg/dL</p>
+      <p><strong>HDL:</strong> {{ hdl }} mg/dL</p>
+      <p><strong>Triglycerides:</strong> {{ trig }} mg/dL</p>
+      <p><strong>Risk:</strong> <span class="risk {{ risk }}">{{ risk.upper() }}</span></p>
+
+      <h3>Daily Plan</h3>
+      <ul>
+        {% for m in plan.meals %}<li>{{ m }}</li>{% endfor %}
+      </ul>
+
+      <h3>Exercise</h3>
+      <ul>
+        {% for e in plan.exercise %}<li>{{ e }}</li>{% endfor %}
+      </ul>
+
+      <h3>Reminders</h3>
+      <ul>
+        {% for r in plan.reminders %}<li>{{ r }}</li>{% endfor %}
+      </ul>
+
+      <h3>Raw OCR Text</h3>
+      <pre>{{ raw_text }}</pre>
+    {% endif %}
+  </div>
+</body>
+</html>
