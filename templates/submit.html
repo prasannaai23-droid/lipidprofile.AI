@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">Enter Lipid Values Manually</h2>
+  <form action="/submit" method="POST" class="mx-auto" style="max-width: 400px;">
+    <div class="mb-3">
+      <label for="patient_id" class="form-label">Patient ID</label>
+      <input type="text" name="patient_id" id="patient_id" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label for="ldl" class="form-label">LDL (mg/dL)</label>
+      <input type="number" name="ldl" id="ldl" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label for="hdl" class="form-label">HDL (mg/dL)</label>
+      <input type="number" name="hdl" id="hdl" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label for="trig" class="form-label">Triglycerides (mg/dL)</label>
+      <input type="number" name="trig" id="trig" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Submit</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
-import sqlite3, os, json
+from flask import Flask, render_template, request, redirect, url_for
+import sqlite3, os, json, random
 from datetime import datetime
 
 # ---- Setup ----
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS reports (
 """)
 conn.commit()
 
-# ---- Risk Function ----
+# ---- Risk Classification ----
 def classify_risk(ldl, hdl, trig):
     if ldl >= 190 or trig >= 1000:
         return "urgent"
@@ -42,11 +42,51 @@ def classify_risk(ldl, hdl, trig):
     else:
         return "low"
 
-# ---- Routes ----
+# ---- Home Route ----
 @app.route("/")
 def home():
-    return render_template("home.html")
+    user_name = "John"
+    random_stat = random.randint(0, 100)
 
+    # Latest report
+    c.execute("SELECT ldl, hdl, trig, risk FROM reports ORDER BY created_at DESC LIMIT 1")
+    row = c.fetchone()
+    if row:
+        latest_ldl, latest_hdl, latest_trig, latest_risk = row
+    else:
+        latest_ldl = latest_hdl = latest_trig = latest_risk = None
+
+    tips = [
+        "Drink plenty of water today!",
+        "Take a 30-minute walk.",
+        "Eat a balanced low-fat meal.",
+        "Check your lipid levels regularly.",
+        "Include fruits and vegetables in your meals.",
+        "Avoid excessive sugar intake."
+    ]
+    random_tip = random.choice(tips)
+
+    plans = {
+        "low": {"meals": ["Balanced diet"], "exercise": ["Walk 30 min, 3x/week"], "reminders": ["Monthly check-up"]},
+        "medium": {"meals": ["Low fat diet"], "exercise": ["Walk daily"], "reminders": ["Weekly check-up"]},
+        "high": {"meals": ["Avoid fried food"], "exercise": ["Light activity daily"], "reminders": ["Doctor consult"]},
+        "urgent": {"meals": ["Strict medical diet"], "exercise": ["Avoid heavy workouts"], "reminders": ["Immediate medical visit"]}
+    }
+    lifestyle_plan = plans.get(latest_risk, plans["low"]) if latest_risk else None
+
+    return render_template(
+        "home.html",
+        name=user_name,
+        stat=random_stat,
+        latest_ldl=latest_ldl,
+        latest_hdl=latest_hdl,
+        latest_trig=latest_trig,
+        latest_risk=latest_risk,
+        random_tip=random_tip,
+        lifestyle_plan=lifestyle_plan
+    )
+
+# ---- Manual Entry ----
 @app.route("/manual", methods=["GET"])
 def manual_entry():
     return render_template("manual.html")
@@ -68,6 +108,7 @@ def submit():
 
     return redirect(url_for("dashboard", patient_id=pid))
 
+# ---- Dashboard ----
 @app.route("/dashboard/<patient_id>")
 def dashboard(patient_id):
     c.execute(
@@ -91,5 +132,6 @@ def dashboard(patient_id):
 
     return render_template("dashboard.html", patient_id=patient_id, ldl=ldl, hdl=hdl, trig=trig, risk=risk, plan=plan, created_at=created_at)
 
+# ---- Run App ----
 if __name__ == "__main__":
     app.run(debug=True)
